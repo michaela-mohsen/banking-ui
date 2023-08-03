@@ -7,6 +7,7 @@ import IProductData from "../types/Product";
 import ProductService from "../services/ProductService";
 import { error } from "console";
 import { Form, FormField } from "react-hooks-form";
+import ICustomErrorData from "../types/CustomError";
 
 const AddAccount: React.FC = () => {
 	const initialAccountState = {
@@ -24,12 +25,27 @@ const AddAccount: React.FC = () => {
 		transactions: [],
 	};
 
+	const initialErrorState = {
+		field: "",
+		message: "",
+	};
+
 	const [account, setAccount] = useState<IAccountData>(initialAccountState);
 	const [noErrors, setNoErrors] = useState<boolean>(true);
 	const [branches, setBranches] = useState<Array<IBranchData>>([]);
 	const [products, setProducts] = useState<Array<IProductData>>([]);
-	const [messages, setMessages] = useState<String[]>([]);
-
+	const [errorMessages, setErrorMessages] = useState<Array<ICustomErrorData>>(
+		[]
+	);
+	const [availableBalanceErrors, setAvailableBalanceErrors] =
+		useState<boolean>(false);
+	const [pendingBalanceErrors, setPendingBalanceErrors] =
+		useState<boolean>(false);
+	const [birthDateError, setBirthDateError] = useState<boolean>(false);
+	const [lastNameErrors, setLastNameErrors] = useState<boolean>(false);
+	const [branchError, setBranchError] = useState<boolean>(false);
+	const [employeeError, setEmployeeError] = useState<boolean>(false);
+	const [productError, setProductError] = useState<boolean>(false);
 	useEffect(() => {
 		findAllBranches();
 	}, [branches]);
@@ -96,7 +112,32 @@ const AddAccount: React.FC = () => {
 			})
 			.catch((error) => {
 				if (Array.isArray(error.response.data)) {
-					setMessages(Array.from(error.response.data));
+					setErrorMessages(Array.from(error.response.data));
+					errorMessages.forEach((e) => {
+						switch (e.field) {
+							case "availableBalance":
+								setAvailableBalanceErrors(true);
+								break;
+							case "pendingBalance":
+								setPendingBalanceErrors(true);
+								break;
+							case "birthDate":
+								setBirthDateError(true);
+								break;
+							case "lastName":
+								setLastNameErrors(true);
+								break;
+							case "branch":
+								setBranchError(true);
+								break;
+							case "employee":
+								setEmployeeError(true);
+								break;
+							case "product":
+								setProductError(true);
+								break;
+						}
+					});
 					setNoErrors(false);
 				} else {
 					console.log("Error", error.response.data);
@@ -114,13 +155,13 @@ const AddAccount: React.FC = () => {
 				</div>
 			);
 		} else {
-			if (messages.length > 0) {
+			if (errorMessages.length > 0) {
 				return (
 					<div className="empty">
 						<p className="empty-title h5">Errors found in form:</p>
 						<ul>
-							{messages?.map((message, i) => (
-								<li key={i}>{message}</li>
+							{errorMessages.map((error, i) => (
+								<li key={i}>{error.message}</li>
 							))}
 						</ul>
 					</div>
@@ -129,7 +170,7 @@ const AddAccount: React.FC = () => {
 				return <div>Couldn't find error messages, sorry</div>;
 			}
 		}
-	}, [noErrors, messages]);
+	}, [noErrors, errorMessages]);
 
 	useEffect(() => {
 		showErrors();
@@ -151,14 +192,25 @@ const AddAccount: React.FC = () => {
 								</label>
 							</div>
 							<div className="col-9 col-sm-12">
-								<input
-									className="form-input"
-									id="availableBalance"
-									name="availableBalance"
-									type="number"
-									value={account.availableBalance}
-									onChange={handleInputChange}
-								/>
+								{availableBalanceErrors ? (
+									<input
+										className="form-input is-success"
+										id="availableBalance"
+										name="availableBalance"
+										type="number"
+										value={account.availableBalance}
+										onChange={handleInputChange}
+									/>
+								) : (
+									<input
+										className="form-input is-error"
+										title="availableBalanceError"
+										name="availableBalance"
+										type="number"
+										value={account.availableBalance}
+										onChange={handleInputChange}
+									/>
+								)}
 							</div>
 						</div>
 					</div>
@@ -170,14 +222,25 @@ const AddAccount: React.FC = () => {
 								</label>
 							</div>
 							<div className="col-9 col-sm-12">
-								<input
-									id="pendingBalance"
-									className="form-input"
-									type="number"
-									name="pendingBalance"
-									value={account.pendingBalance}
-									onChange={handleInputChange}
-								/>
+								{pendingBalanceErrors ? (
+									<input
+										id="pendingBalance"
+										className="form-input is-success"
+										type="number"
+										name="pendingBalance"
+										value={account.pendingBalance}
+										onChange={handleInputChange}
+									/>
+								) : (
+									<input
+										title="pendingBalanceError"
+										className="form-input is-error"
+										type="number"
+										name="pendingBalance"
+										value={account.pendingBalance}
+										onChange={handleInputChange}
+									/>
+								)}
 							</div>
 						</div>
 					</div>
