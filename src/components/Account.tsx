@@ -6,7 +6,8 @@ import CustomerService from "../services/CustomerService";
 import ICustomerData from "../types/Customer";
 import ITransactionData from "../types/Transaction";
 import TransactionService from "../services/TransactionService";
-
+import ICustomErrorData from "../types/CustomError";
+import { Form } from "react-hooks-form";
 const Account: React.FC = () => {
 	const { id } = useParams();
 
@@ -16,7 +17,7 @@ const Account: React.FC = () => {
 	});
 
 	const initialAccountState = {
-		id: null,
+		id: 0,
 		availableBalance: 0,
 		pendingBalance: 0,
 		active: "true",
@@ -39,6 +40,7 @@ const Account: React.FC = () => {
 		city: "",
 		state: "",
 		zipCode: "",
+		accounts: []
 	};
 
 	const initialTransactionState = {
@@ -57,6 +59,10 @@ const Account: React.FC = () => {
 
 	const [submitted, setSubmitted] = useState<boolean>(false);
 
+	const [otherAccount, setOtherAccount] = useState<number>(0);
+
+	const [transferToOtherAccount, setTransferToOtherAccount] = useState<boolean>(false);
+
 	const [currentAccount, setCurrentAccount] =
 		useState<IAccountData>(initialAccountState);
 	const [currentCustomer, setCurrentCustomer] =
@@ -64,8 +70,13 @@ const Account: React.FC = () => {
 	const getAccount = (id: string) => {
 		AccountService.get(id).then((response: any) => {
 			setCurrentAccount(response.data);
+			setSubmitted(false);
 		});
 	};
+
+	const [errorMessages, setErrorMessages] = useState<Array<ICustomErrorData>>([]);
+	const [customErrorMessage, setCustomErrorMessage] = useState<string>("");
+	const [noErrors, setNoErrors] = useState<boolean>(true);
 
 	const getCustomer = (lastName: string, birthDate: string) => {
 		CustomerService.findByLastNameAndBirthDate(lastName, birthDate).then(
@@ -111,10 +122,23 @@ const Account: React.FC = () => {
 
 	const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = event.target;
+		if (name === "type") {
+			if (value === "TRANSFER") {
+				setTransferToOtherAccount(true);
+			} else {
+				setTransferToOtherAccount(false);
+			}
+		}
 		setTransaction({ ...transaction, [name]: value });
 	};
 
+	const onChangeSetOtherAccount = (e: ChangeEvent<HTMLSelectElement>) => {
+		const { value } = e.currentTarget;
+		setOtherAccount(Number.parseInt(value));
+	}
+
 	const saveTransaction = () => {
+		const params = getRequestParams(otherAccount);
 		let data = {
 			id: transaction.id,
 			amount: transaction.amount,
@@ -125,19 +149,102 @@ const Account: React.FC = () => {
 			account: currentAccount.id,
 		};
 
-		TransactionService.create(data).then((response: any) => {
-			setTransaction({
-				amount: response.data.amount,
-				fundsAvailableDate: response.data.fundsAvailableDate,
-				date: response.data.date,
-				time: response.data.time,
-				type: response.data.type,
-				account: response.data.account,
+		let createTransactionFunction = TransactionService.create(data, params);
+		createTransactionFunction
+			.then((response: any) => {
+				setTransaction({
+					amount: response.data.amount,
+					fundsAvailableDate: response.data.fundsAvailableDate,
+					date: response.data.date,
+					time: response.data.time,
+					type: response.data.type,
+					account: response.data.account,
+				});
+				setSubmitted(true);
+				setNoErrors(true);
+				refreshPage();
+			}).catch((error) => {
+				setNoErrors(false);
+				if (Array.isArray(error.response.data)) {
+					setErrorMessages(Array.from(error.response.data));
+				} else {
+					setCustomErrorMessage(error.response.data);
+				}
 			});
-			setSubmitted(true);
-			refreshPage();
-		});
+		return createTransactionFunction;
 	};
+
+	const renderErrorMessages = (field: string) => {
+		let messages: string[] = [];
+		const el = document.getElementById(field + "-group");
+		el?.setAttribute("class", "form-group")
+		if (!noErrors && errorMessages.length > 0) {
+			errorMessages.forEach((eMessage) => {
+				if (eMessage.field === field) {
+					el?.setAttribute("class", "form-group has-error")
+					messages.push(eMessage.message + " ");
+				}
+			});
+		}
+		return <div className="form-input-hint">{messages}</div>;
+	}
+
+	const renderCustomErrorMessage = () => {
+		if (!noErrors && customErrorMessage !== "") {
+			return <div className="toast toast-error">{customErrorMessage}</div>
+		}
+	}
+
+	const getRequestParams = (otherAccount: number) => {
+		let params = { otherAccount };
+		if (otherAccount) {
+			params["otherAccount"] = otherAccount;
+		}
+		return params;
+	}
+
+	const renderTransferOption = (product: string) => {
+		if (product.includes('Account') || product.includes('Deposit')) {
+			const arrayOfOtherAccounts: IAccountData[] = [];
+			let otherAccount = initialAccountState;
+			currentCustomer.accounts.filter((account) => (account.id !== currentAccount.id && (account.product.includes('Account') || account.product.includes('Deposit'))), otherAccount).forEach((a) => (
+				arrayOfOtherAccounts.push(a)
+			))
+			if (arrayOfOtherAccounts.length > 0) {
+				return <div><label className="form-radio">
+					<input
+						id="transfer-input"
+						type="radio"
+						name="type"
+						value={"TRANSFER"}
+						onChange={handleInputChange}
+					/>
+					<em className="form-icon"></em> Transfer
+				</label>
+				</div>
+			}
+		}
+	}
+
+	const renderTransferTransaction = (transferToOtherAccount: boolean) => {
+		if (currentCustomer != null && transferToOtherAccount) {
+			const arrayOfOtherAccounts: IAccountData[] = [];
+			let otherAccount = initialAccountState;
+			currentCustomer.accounts.filter((account) => (account.id !== currentAccount.id && (account.product.includes('Account') || account.product.includes('Deposit'))), otherAccount).forEach((a) => (
+				arrayOfOtherAccounts.push(a)
+			))
+			return (
+				<div className="column col-12">
+					<select className="form-select" id="otherAccounts" name="otherAccount" title="otherAccount" onChange={onChangeSetOtherAccount}>
+						<option value={""}>Select an account</option>
+						{arrayOfOtherAccounts.map((account) => (
+							<option key={account.id} value={account.id}>{account.id}: {account.product}</option>
+						))}
+					</select>
+				</div>
+			)
+		}
+	}
 
 	const renderToggleTransactions = () => {
 		let transactions = currentAccount.transactions;
@@ -230,15 +337,16 @@ const Account: React.FC = () => {
 							<div className="modal-body">
 								<div className="content columns text-center">
 									{submitted ? (
-										<div>I've been submitted. yay!</div>
+										<div>Transaction complete.</div>
 									) : (
 										<div>
-											<form
+											<Form
 												className="form-horizontal"
 												onSubmit={saveTransaction}>
 												<div className="columns">
+													{renderCustomErrorMessage()}
 													<div className="column col-12 py-2">
-														<div className="form-group">
+														<div className="form-group" id="type-group">
 															<div className="col-6 col-sm-12">
 																<label className="form-label" htmlFor="type">
 																	Transaction Type:
@@ -263,11 +371,14 @@ const Account: React.FC = () => {
 																	/>
 																	<em className="form-icon"></em> Deposit
 																</label>
+																{renderTransferOption(currentAccount.product)}
+																{renderErrorMessages("type")}
 															</div>
 														</div>
 													</div>
+													{renderTransferTransaction(transferToOtherAccount)}
 													<div className="column col-12 py-2">
-														<div className="form-group">
+														<div className="form-group" id="amount-group">
 															<div className="col-6 col-sm-12">
 																<label htmlFor="amount">Amount:</label>
 															</div>
@@ -280,6 +391,7 @@ const Account: React.FC = () => {
 																	value={transaction.amount}
 																	onChange={handleInputChange}
 																/>
+																{renderErrorMessages("amount")}
 															</div>
 														</div>
 													</div>
@@ -289,7 +401,7 @@ const Account: React.FC = () => {
 														Submit
 													</button>
 												</div>
-											</form>
+											</Form>
 										</div>
 									)}
 								</div>

@@ -6,6 +6,7 @@ import AccountsList from "./components/AccountsList";
 import Account from "./components/Account";
 import CustomersList from "./components/CustomersList";
 import AddCustomer from "./components/AddCustomer";
+import UpdateCustomer from "./components/UpdateCustomer";
 
 function App() {
 	return (
@@ -64,6 +65,7 @@ function App() {
 					<Route path="/customers" element={<CustomersList />} />
 					<Route path="/accounts/add-account" element={<AddAccount />} />
 					<Route path="/customers/add-customer" element={<AddCustomer />} />
+					<Route path="/customers/update-customer/:id" element={<UpdateCustomer />} />
 					<Route path="/accounts/:id" element={<Account />} />
 				</Routes>
 			</div>

@@ -1,3 +1,5 @@
+import IAccountData from "./Account"
+
 export default interface ICustomerData {
     id?: any,
     birthDate: string,
@@ -7,4 +9,5 @@ export default interface ICustomerData {
     city: string,
     state: string,
     zipCode: string
+    accounts: Array<IAccountData>
 }

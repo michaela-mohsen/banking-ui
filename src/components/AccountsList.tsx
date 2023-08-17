@@ -22,16 +22,7 @@ const AccountsList: React.FC = () => {
 
 	const formatDate = (date: string) => {
 		const d = new Date(date);
-		const dtf = new Intl.DateTimeFormat("en", { dateStyle: "short" });
-		return dtf.format(d);
-	};
-
-	const formatDateTime = (date: string) => {
-		const d = new Date(date);
-		const dtf = new Intl.DateTimeFormat("en", {
-			dateStyle: "short",
-			timeStyle: "short",
-		});
+		const dtf = new Intl.DateTimeFormat("en", { month: "2-digit", year: "numeric", day: "2-digit" });
 		return dtf.format(d);
 	};
 
@@ -152,7 +143,7 @@ const AccountsList: React.FC = () => {
 								{account.lastName} · {formatDate(account.birthDate)}
 							</div>
 							<div className="tile-subtitle text-gray">
-								Last activity {formatDateTime(account.lastActivityDate)}
+								Last activity {account.lastActivityDate}
 							</div>
 						</div>
 						<div className="tile-action">

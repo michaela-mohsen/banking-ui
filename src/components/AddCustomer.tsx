@@ -2,6 +2,8 @@ import { ChangeEvent, useState } from "react";
 import ICustomerData from "../types/Customer";
 import CustomerService from "../services/CustomerService";
 import { Link } from "react-router-dom";
+import ICustomErrorData from "../types/CustomError";
+import { Form } from "react-hooks-form";
 
 const AddCustomer: React.FC = () => {
 	const initialCustomerState = {
@@ -13,10 +15,14 @@ const AddCustomer: React.FC = () => {
 		city: "",
 		state: "",
 		zipCode: "",
+		accounts: []
 	};
 	const [customer, setCustomer] = useState<ICustomerData>(initialCustomerState);
 	const [submitted, setSubmitted] = useState<boolean>(false);
-
+	const [errorMessages, setErrorMessages] = useState<Array<ICustomErrorData>>(
+		[]
+	);
+	const [noErrors, setNoErrors] = useState<boolean>(true);
 	const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = event.target;
 		setCustomer({ ...customer, [name]: value });
@@ -31,26 +37,48 @@ const AddCustomer: React.FC = () => {
 			city: customer.city,
 			state: customer.state,
 			zipCode: customer.zipCode,
+			accounts: []
 		};
 
-		CustomerService.create(data).then((response: any) => {
-			setCustomer({
-				birthDate: response.data.birthDate,
-				firstName: response.data.firstName,
-				lastName: response.data.lastName,
-				address: response.data.address,
-				city: response.data.city,
-				state: response.data.state,
-				zipCode: response.data.zipCode,
+		let createCustomerFunction = CustomerService.create(data);
+
+		createCustomerFunction
+			.then((response: any) => {
+				setCustomer({
+					birthDate: response.data.birthDate,
+					firstName: response.data.firstName,
+					lastName: response.data.lastName,
+					address: response.data.address,
+					city: response.data.city,
+					state: response.data.state,
+					zipCode: response.data.zipCode,
+					accounts: response.data.accounts
+				});
+				setSubmitted(true);
+				setNoErrors(true);
+			}).catch((error) => {
+				if (Array.isArray(error.response.data)) {
+					setErrorMessages(Array.from(error.response.data));
+					setNoErrors(false);
+				}
 			});
-			setSubmitted(true);
-		});
+		return createCustomerFunction;
 	};
 
-	const newCustomer = () => {
-		setCustomer(initialCustomerState);
-		setSubmitted(false);
-	};
+	const renderErrorMessage = (field: string) => {
+		let messages: string[] = [];
+		const el = document.getElementById(field + "-group");
+		el?.setAttribute("class", "form-group")
+		if (!noErrors && errorMessages.length > 0) {
+			errorMessages.forEach((eMessage) => {
+				if (eMessage.field === field) {
+					el?.setAttribute("class", "form-group has-error")
+					messages.push(eMessage.message + " ");
+				}
+			});
+		}
+		return <div className="form-input-hint">{messages}</div>;
+	}
 	return (
 		<div>
 			{submitted ? (
@@ -65,13 +93,13 @@ const AddCustomer: React.FC = () => {
 					</Link>
 				</div>
 			) : (
-				<form className="card m-2 form-horizontal" onSubmit={saveCustomer}>
+				<Form className="card m-2 form-horizontal" onSubmit={saveCustomer}>
 					<div className="card-header">
 						<h3 className="card-title text-center">Add New Customer</h3>
 					</div>
 					<div className="card-body">
 						<div className="column col-12 py-2">
-							<div className="form-group">
+							<div className="form-group" id="firstName-group">
 								<div className="col-3 col-sm-12">
 									<label className="form-label" htmlFor="firstName">
 										First Name:
@@ -86,11 +114,13 @@ const AddCustomer: React.FC = () => {
 										onChange={handleInputChange}
 										name="firstName"
 									/>
+									{renderErrorMessage("firstName")}
 								</div>
+
 							</div>
 						</div>
 						<div className="column col-12 py-2">
-							<div className="form-group">
+							<div className="form-group" id="lastName-group">
 								<div className="col-3 col-sm-12">
 									<label className="form-label" htmlFor="lastName">
 										Last Name:
@@ -105,11 +135,13 @@ const AddCustomer: React.FC = () => {
 										onChange={handleInputChange}
 										name="lastName"
 									/>
+									{renderErrorMessage("lastName")}
 								</div>
+
 							</div>
 						</div>
 						<div className="column col-12 py-2">
-							<div className="form-group">
+							<div className="form-group" id="birthDate-group">
 								<div className="col-3 col-sm-12">
 									<label className="form-label" htmlFor="birthDate">
 										Birth Date:
@@ -124,11 +156,12 @@ const AddCustomer: React.FC = () => {
 										onChange={handleInputChange}
 										name="birthDate"
 									/>
+									{renderErrorMessage("birthDate")}
 								</div>
 							</div>
 						</div>
 						<div className="column col-12 py-2">
-							<div className="form-group">
+							<div className="form-group" id="address-group">
 								<div className="col-3 col-sm-12">
 									<label className="form-label" htmlFor="address">
 										Address:
@@ -143,11 +176,12 @@ const AddCustomer: React.FC = () => {
 										onChange={handleInputChange}
 										name="address"
 									/>
+									{renderErrorMessage("address")}
 								</div>
 							</div>
 						</div>
 						<div className="column col-12 py-2">
-							<div className="form-group">
+							<div className="form-group" id="city-group">
 								<div className="col-3 col-sm-12">
 									<label className="form-label" htmlFor="city">
 										City:
@@ -162,11 +196,12 @@ const AddCustomer: React.FC = () => {
 										onChange={handleInputChange}
 										name="city"
 									/>
+									{renderErrorMessage("city")}
 								</div>
 							</div>
 						</div>
 						<div className="column col-12 py-2">
-							<div className="form-group">
+							<div className="form-group" id="state-group">
 								<div className="col-3 col-sm-12">
 									<label className="form-label" htmlFor="state">
 										State:
@@ -181,11 +216,12 @@ const AddCustomer: React.FC = () => {
 										onChange={handleInputChange}
 										name="state"
 									/>
+									{renderErrorMessage("state")}
 								</div>
 							</div>
 						</div>
 						<div className="column col-12 py-2">
-							<div className="form-group">
+							<div className="form-group" id="zipCode-group">
 								<div className="col-3 col-sm-12">
 									<label className="form-label" htmlFor="zipCode">
 										Zip Code:
@@ -200,6 +236,7 @@ const AddCustomer: React.FC = () => {
 										onChange={handleInputChange}
 										name="zipCode"
 									/>
+									{renderErrorMessage("zipCode")}
 								</div>
 							</div>
 						</div>
@@ -209,7 +246,7 @@ const AddCustomer: React.FC = () => {
 							Submit
 						</button>
 					</div>
-				</form>
+				</Form>
 			)}
 		</div>
 	);
