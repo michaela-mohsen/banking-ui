@@ -1,12 +1,13 @@
 import httpCommon from "../http-common"
 import IProductData from "../types/Product"
+import authHeader from "./Auth-Header";
 
 const getAll = () => {
-    return httpCommon.get<Array<IProductData>>("/products");
+    return httpCommon.get<Array<IProductData>>("/products", { headers: authHeader() });
 }
 
 const findByName = (name: string) => {
-    return httpCommon.get<IProductData>(`/products/search?name=${name}`);
+    return httpCommon.get<IProductData>(`/user/products/search?name=${name}`, { headers: authHeader() });
 }
 
 const ProductService = {
