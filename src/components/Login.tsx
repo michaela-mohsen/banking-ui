@@ -1,10 +1,9 @@
 import { ChangeEvent, useEffect, useState } from "react";
 import ILoginData from "../types/Login";
 import ICustomErrorData from "../types/CustomError";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Form } from "react-hooks-form";
 import AuthService from "../services/AuthService";
-import IUserData from "../types/User";
 
 const Login: React.FC = () => {
     let navigate = useNavigate();

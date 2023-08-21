@@ -19,11 +19,11 @@ const update = (id: any, data: ICustomerData) => {
 }
 
 const remove = (id: any) => {
-    return httpCommon.delete<any>(`/customers/delete/${id}`, { headers: authHeader() });
+    return httpCommon.delete<any>(`/user/customers/delete/${id}`, { headers: authHeader() });
 }
 
 const findByLastNameAndBirthDate = (lastName: string, birthDate: string) => {
-    return httpCommon.get<ICustomerData>(`/customers/search?lastName=${lastName}&birthDate=${birthDate}`, { headers: authHeader() });
+    return httpCommon.get<ICustomerData>(`/user/customers/search?lastName=${lastName}&birthDate=${birthDate}`, { headers: authHeader() });
 }
 
 const CustomerService = {

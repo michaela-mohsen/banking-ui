@@ -3,7 +3,7 @@ import IProductData from "../types/Product"
 import authHeader from "./Auth-Header";
 
 const getAll = () => {
-    return httpCommon.get<Array<IProductData>>("/products", { headers: authHeader() });
+    return httpCommon.get<Array<IProductData>>("/user/products", { headers: authHeader() });
 }
 
 const findByName = (name: string) => {
