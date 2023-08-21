@@ -6,6 +6,10 @@ const register = (data: IRegisterData) => {
     return httpCommon.post<IRegisterData>("/auth/sign-up", data);
 }
 
+const loginPage = () => {
+    return httpCommon.get("/auth/log-in");
+}
+
 const login = (data: ILoginData) => {
     return httpCommon.post("/auth/sign-in", data);
 }
@@ -25,7 +29,8 @@ const AuthService = {
     register,
     login,
     logout,
-    getCurrentUser
+    getCurrentUser,
+    loginPage
 };
 
 export default AuthService;

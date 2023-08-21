@@ -42,13 +42,6 @@ const AccountsList: React.FC = () => {
 		AccountService.getAll().then((response: any) => {
 			setAccounts(response.data);
 			setCurrentAccount(null);
-		}).catch((error) => {
-			if (error.response && error.response.status === 401) {
-				const refreshToken = TokenService.getLocalRefreshToken();
-				TokenService.refreshToken(refreshToken).then((response: any) => {
-					TokenService.updateLocalToken(response.data.accessToken);
-				});
-			}
 		});
 	};
 
@@ -65,13 +58,6 @@ const AccountsList: React.FC = () => {
 		AccountService.findByProductType(typeLoan).then((response: any) => {
 			setAccounts(response.data);
 			setCurrentAccount(null);
-		}).catch((error) => {
-			if (error.response && error.response.status === 401) {
-				const refreshToken = TokenService.getLocalRefreshToken();
-				TokenService.refreshToken(refreshToken).then((response: any) => {
-					TokenService.updateLocalToken(response.data.accessToken);
-				});
-			}
 		});
 	};
 
@@ -79,13 +65,6 @@ const AccountsList: React.FC = () => {
 		AccountService.findByProductType(typeAccount).then((response: any) => {
 			setAccounts(response.data);
 			setCurrentAccount(null);
-		}).catch((error) => {
-			if (error.response && error.response.status === 401) {
-				const refreshToken = TokenService.getLocalRefreshToken();
-				TokenService.refreshToken(refreshToken).then((response: any) => {
-					TokenService.updateLocalToken(response.data.accessToken);
-				});
-			}
 		});
 	};
 

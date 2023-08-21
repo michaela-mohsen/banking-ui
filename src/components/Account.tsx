@@ -8,7 +8,6 @@ import ITransactionData from "../types/Transaction";
 import TransactionService from "../services/TransactionService";
 import ICustomErrorData from "../types/CustomError";
 import { Form } from "react-hooks-form";
-import TokenService from "../services/TokenService";
 const Account: React.FC = () => {
 	const { id } = useParams();
 
@@ -72,13 +71,6 @@ const Account: React.FC = () => {
 		AccountService.get(id).then((response: any) => {
 			setCurrentAccount(response.data);
 			setSubmitted(false);
-		}).catch((error) => {
-			if (error.response && error.response.status === 401) {
-				const refreshToken = TokenService.getLocalRefreshToken();
-				TokenService.refreshToken(refreshToken).then((response: any) => {
-					TokenService.updateLocalToken(response.data.accessToken);
-				});
-			}
 		});
 	};
 
@@ -91,14 +83,7 @@ const Account: React.FC = () => {
 			(response: any) => {
 				setCurrentCustomer(response.data);
 			}
-		).catch((error) => {
-			if (error.response && error.response.status === 401) {
-				const refreshToken = TokenService.getLocalRefreshToken();
-				TokenService.refreshToken(refreshToken).then((response: any) => {
-					TokenService.updateLocalToken(response.data.accessToken);
-				});
-			}
-		});
+		);
 	};
 
 	useEffect(() => {
@@ -132,13 +117,6 @@ const Account: React.FC = () => {
 
 		AccountService.update(currentAccount.id, data).then((response: any) => {
 			refreshPage();
-		}).catch((error) => {
-			if (error.response && error.response.status === 401) {
-				const refreshToken = TokenService.getLocalRefreshToken();
-				TokenService.refreshToken(refreshToken).then((response: any) => {
-					TokenService.updateLocalToken(response.data.accessToken);
-				});
-			}
 		});
 	};
 
@@ -191,12 +169,6 @@ const Account: React.FC = () => {
 					setErrorMessages(Array.from(error.response.data));
 				} else {
 					setCustomErrorMessage(error.response.data);
-					if (error.response.status === 401) {
-						const refreshToken = TokenService.getLocalRefreshToken();
-						TokenService.refreshToken(refreshToken).then((response: any) => {
-							TokenService.updateLocalToken(response.data.accessToken);
-						})
-					}
 				}
 			});
 		return createTransactionFunction;

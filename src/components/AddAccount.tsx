@@ -53,26 +53,12 @@ const AddAccount: React.FC = () => {
 	const findAllBranches = () => {
 		BranchService.getAll().then((response: any) => {
 			setBranches(response.data);
-		}).catch((error) => {
-			if (error.response && error.response.status === 401) {
-				const refreshToken = TokenService.getLocalRefreshToken();
-				TokenService.refreshToken(refreshToken).then((response: any) => {
-					TokenService.updateLocalToken(response.data.accessToken);
-				});
-			}
 		});
 	};
 
 	const findAllProducts = () => {
 		ProductService.getAll().then((response: any) => {
 			setProducts(response.data);
-		}).catch((error) => {
-			if (error.response && error.response.status === 401) {
-				const refreshToken = TokenService.getLocalRefreshToken();
-				TokenService.refreshToken(refreshToken).then((response: any) => {
-					TokenService.updateLocalToken(response.data.accessToken);
-				});
-			}
 		});
 	};
 
@@ -114,13 +100,6 @@ const AddAccount: React.FC = () => {
 				if (Array.isArray(error.response.data)) {
 					setErrorMessages(Array.from(error.response.data));
 					setNoErrors(false);
-				} else {
-					if (error.response.status === 401) {
-						const refreshToken = TokenService.getLocalRefreshToken();
-						TokenService.refreshToken(refreshToken).then((response: any) => {
-							TokenService.updateLocalToken(response.data.accessToken);
-						});
-					}
 				}
 			});
 		return createAccountFunction;

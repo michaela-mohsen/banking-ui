@@ -14,6 +14,8 @@ const Login: React.FC = () => {
         password: ""
     }
 
+    const [loginPage, setLoginPage] = useState<string>("");
+
     const [login, setLogin] = useState<ILoginData>(initialLoginState);
     const [noErrors, setNoErrors] = useState<boolean>(true);
     const [errorMessages, setErrorMessages] = useState<Array<ICustomErrorData>>([]);
@@ -22,6 +24,17 @@ const Login: React.FC = () => {
     const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
         const { name, value } = event.target;
         setLogin({ ...login, [name]: value });
+    }
+
+    useEffect(() => {
+        handleLoginPage();
+    }, []);
+
+    const handleLoginPage = () => {
+        let loginPageFunction = AuthService.loginPage();
+        loginPageFunction.then((response: any) => {
+            setLoginPage(response.data)
+        });
     }
 
     const handleLogin = () => {
