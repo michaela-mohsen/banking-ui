@@ -10,6 +10,7 @@ import UpdateCustomer from "./components/UpdateCustomer";
 import Login from "./components/Login";
 import Profile from "./components/Profile";
 import AuthService from "./services/AuthService";
+import Register from "./components/Register";
 
 function App() {
 	let navigate = useNavigate();
@@ -77,8 +78,9 @@ function App() {
 			</header>
 			<div className="container">
 				<Routes>
-					<Route path="/" element={<AccountsList />} />
+					<Route path="/" element={<Login />} />
 					<Route path="/login" element={<Login />} />
+					<Route path="/register" element={<Register />} />
 					<Route path="/profile" element={<Profile />} />
 					<Route path="/accounts" element={<AccountsList />} />
 					<Route path="/customers" element={<CustomersList />} />

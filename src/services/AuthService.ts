@@ -1,6 +1,7 @@
 import httpCommon from "../http-common";
 import ILoginData from "../types/Login";
 import IRegisterData from "../types/Register";
+import authHeader from "./Auth-Header";
 
 const register = (data: IRegisterData) => {
     return httpCommon.post<IRegisterData>("/auth/sign-up", data);
@@ -16,7 +17,7 @@ const login = (data: ILoginData) => {
 
 const logout = () => {
     localStorage.removeItem("user");
-    return httpCommon.delete("/auth/sign-out");
+    return httpCommon.get("/auth/sign-out", { headers: authHeader() });
 }
 
 const getCurrentUser = () => {

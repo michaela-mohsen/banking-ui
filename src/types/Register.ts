@@ -6,5 +6,6 @@ export default interface IRegisterData {
     firstName: string,
     lastName: string,
     title: string,
-    avatar: string
+    avatar: string,
+    branch: string;
 }

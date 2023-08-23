@@ -2,8 +2,6 @@ import { ChangeEvent, useEffect, useState } from "react";
 import IAccountData from "../types/Account";
 import AccountService from "../services/AccountService";
 import { Link } from "react-router-dom";
-import TokenService from "../services/TokenService";
-import AuthService from "../services/AuthService";
 
 const AccountsList: React.FC = () => {
 	const [accounts, setAccounts] = useState<Array<IAccountData>>([]);

@@ -1,8 +1,7 @@
 import { ChangeEvent, useEffect, useState } from "react";
 import ILoginData from "../types/Login";
 import ICustomErrorData from "../types/CustomError";
-import { useNavigate } from "react-router-dom";
-import { Form } from "react-hooks-form";
+import { Link, useNavigate } from "react-router-dom";
 import AuthService from "../services/AuthService";
 
 const Login: React.FC = () => {
@@ -36,7 +35,8 @@ const Login: React.FC = () => {
         });
     }
 
-    const handleLogin = () => {
+    const handleLogin = (e: { preventDefault: () => void; }) => {
+        e.preventDefault();
         let data = {
             username: login.username,
             password: login.password
@@ -71,7 +71,9 @@ const Login: React.FC = () => {
                 }
             });
         }
-        return <div className="form-input-hint">{messages}</div>;
+        return <div className="column col-12">
+            <div className="form-input-hint">{messages}</div>
+        </div>;
     }
 
     const renderCustomErrorMessage = () => {
@@ -84,7 +86,7 @@ const Login: React.FC = () => {
         <div className="card-header">
             <h2 className="card-title text-center">Login</h2>
         </div>
-        <Form className="card-body form-horizontal s-rounded" onSubmit={handleLogin}>
+        <form className="card-body form-horizontal s-rounded" onSubmit={handleLogin}>
             <div className="columns">
                 {renderCustomErrorMessage()}
                 <div className="column col-12 py-2">
@@ -94,8 +96,9 @@ const Login: React.FC = () => {
                         </div>
                         <div className="col-9 col-sm-12">
                             <input className="form-input" title="username" name="username" type="text" value={login.username} onChange={handleInputChange} />
+                            {renderErrorMessages("username")}
                         </div>
-                        {renderErrorMessages("username")}
+
                     </div>
                 </div>
                 <div className="column col-12 py-2">
@@ -105,17 +108,20 @@ const Login: React.FC = () => {
                         </div>
                         <div className="col-9 col-sm-12">
                             <input className="form-input" title="password" name="password" type="password" value={login.password} onChange={handleInputChange} />
+                            {renderErrorMessages("password")}
                         </div>
-                        {renderErrorMessages("password")}
+
                     </div>
                 </div>
                 <div className="column py-2 text-center">
                     <button className="btn btn-primary" type="submit">Log in</button>
                 </div>
             </div>
-        </Form>
+        </form>
         <div className="card-footer text-center">
-            <span>New User? Register here.</span>
+            <Link to={"/register"} className="btn btn-link text-primary">
+                New User? Register here.
+            </Link>
         </div>
     </div>
 };

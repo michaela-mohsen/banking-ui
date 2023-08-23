@@ -7,9 +7,12 @@ import IProductData from "../types/Product";
 import ProductService from "../services/ProductService";
 import { Form } from "react-hooks-form";
 import ICustomErrorData from "../types/CustomError";
-import TokenService from "../services/TokenService";
+import IEmployeeData from "../types/Employee";
+import EmployeeService from "../services/EmployeeService";
 
 const AddAccount: React.FC = () => {
+	const currentUser = localStorage.getItem("user");
+
 	const initialAccountState = {
 		id: null,
 		availableBalance: 0,
@@ -25,7 +28,19 @@ const AddAccount: React.FC = () => {
 		transactions: [],
 	};
 
+	const initialEmployeeState = {
+		id: 0,
+		firstName: "",
+		lastName: "",
+		email: "",
+		branch: "",
+		department: "",
+		startDate: "",
+		title: ""
+	}
+
 	const [account, setAccount] = useState<IAccountData>(initialAccountState);
+	const [employee, setEmployee] = useState<IEmployeeData>(initialEmployeeState);
 	const [noErrors, setNoErrors] = useState<boolean>(true);
 	const [branches, setBranches] = useState<Array<IBranchData>>([]);
 	const [products, setProducts] = useState<Array<IProductData>>([]);
@@ -39,6 +54,13 @@ const AddAccount: React.FC = () => {
 	useEffect(() => {
 		findAllProducts();
 	}, [products]);
+
+	useEffect(() => {
+		if (currentUser) {
+			const userString = JSON.parse(currentUser);
+			findEmployeeByEmail(userString.email);
+		}
+	}, []);
 
 	const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = event.target;
@@ -62,6 +84,42 @@ const AddAccount: React.FC = () => {
 		});
 	};
 
+	const findEmployeeByEmail = (email: string) => {
+		EmployeeService.findByEmail(email).then((response: any) => {
+			setEmployee(response.data);
+		});
+	};
+
+	const renderBranchOptions = (branchName: string) => {
+
+		branches.forEach((branch) => {
+			const el = document.getElementById(branch.name);
+			if (branch.name === branchName) {
+				el?.setAttribute("checked", "");
+				el?.setAttribute("disabled", "");
+			} else {
+				el?.setAttribute("disabled", "");
+			}
+
+		});
+		return <div>
+			{branches?.map((branch) => (
+				<label className="form-radio" key={branch.id}>
+					<input
+						id={`${branch.name}`}
+						type="radio"
+						name="branch"
+						value={branch.name}
+						onChange={handleInputChange}
+						placeholder="branch"
+					/>
+					<em className="form-icon"></em>
+					{branch.name}
+				</label>
+			))}
+		</div>
+	}
+
 	const saveAccount = () => {
 		let data = {
 			availableBalance: account.availableBalance,
@@ -69,8 +127,8 @@ const AddAccount: React.FC = () => {
 			active: account.active,
 			lastName: account.lastName,
 			birthDate: account.birthDate,
-			branch: account.branch,
-			employee: account.employee,
+			branch: employee.branch,
+			employee: employee.id,
 			product: account.product,
 			lastActivityDate: account.lastActivityDate,
 			openDate: account.openDate,
@@ -211,19 +269,7 @@ const AddAccount: React.FC = () => {
 						<div className="form-group" id="branch-group">
 							<div className="col-3">Branch:</div>
 							<div className="col-9">
-								{branches?.map((branch) => (
-									<label className="form-radio" key={branch.id}>
-										<input
-											type="radio"
-											name="branch"
-											value={branch.name}
-											onChange={handleInputChange}
-											placeholder="branch"
-										/>
-										<em className="form-icon"></em>
-										{branch.name}
-									</label>
-								))}
+								{renderBranchOptions(employee.branch)}
 								{renderErrorMessage("branch")}
 							</div>
 
@@ -241,9 +287,10 @@ const AddAccount: React.FC = () => {
 									className="form-input"
 									type="number"
 									id="employee"
-									value={account.employee}
+									value={employee.id}
 									onChange={handleInputChange}
 									name="employee"
+									disabled
 								/>
 								{renderErrorMessage("employee")}
 							</div>
