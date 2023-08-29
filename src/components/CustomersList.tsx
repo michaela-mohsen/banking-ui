@@ -63,26 +63,6 @@ const CustomersList: React.FC = () => {
 		setLastName(lastName);
 	};
 
-	const renderCustomerAccounts = (customer: ICustomerData) => {
-		if (customer.accounts.length > 0) {
-			return <ul className="menu">
-				{customer.accounts.map((account) => (
-					<li key={account?.id} className="menu-item"><Link
-						to={"/accounts/" + account.id}
-						className="btn btn-link">
-						{account.product}
-					</Link></li>
-				))}
-			</ul>;
-		} else {
-			return <ul className="menu">
-				<li className="menu-item"><Link to={"/accounts/add-account"} className="btn btn-link">
-					Add new account
-				</Link></li>
-			</ul>;
-		}
-	}
-
 	return (
 		<div>
 			<div className="columns py-2">
@@ -116,7 +96,6 @@ const CustomersList: React.FC = () => {
 						<th>Last Name</th>
 						<th>Birth Date</th>
 						<th>Address</th>
-						<th>Accounts</th>
 						<th>Actions</th>
 					</tr>
 				</thead>
@@ -132,20 +111,8 @@ const CustomersList: React.FC = () => {
 								{customer.zipCode}
 							</td>
 							<td>
-								<div className="accordion">
-									<input type="checkbox" id={"accordion-" + customer.id} name="accordion-checkbox" hidden />
-									<label className="accordion-header" htmlFor={"accordion-" + customer.id}>
-										<i className="icon icon-arrow-right mr-1"></i>
-										{customer.accounts.length}
-									</label>
-									<div className="accordion-body">
-										{renderCustomerAccounts(customer)}
-									</div>
-								</div>
-							</td>
-							<td>
 								<div className="btn-group btn-group-block">
-									<Link to={"/customers/update-customer/" + customer.id} className="btn btn-primary">Update</Link>
+									<Link to={"/customers/" + customer.id} className="btn">Accounts and More</Link>
 									<button className="btn btn-error" onClick={() => deleteCustomer(customer.id)}>Delete</button>
 								</div>
 							</td>

@@ -1,5 +1,5 @@
 import { ChangeEvent, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import IAccountData from "../types/Account";
 import AccountService from "../services/AccountService";
 import CustomerService from "../services/CustomerService";
@@ -9,7 +9,11 @@ import TransactionService from "../services/TransactionService";
 import ICustomErrorData from "../types/CustomError";
 import { Form } from "react-hooks-form";
 const Account: React.FC = () => {
+	const { accountId } = useParams();
+
 	const { id } = useParams();
+
+	let navigate = useNavigate();
 
 	const formatter = new Intl.NumberFormat("en-US", {
 		style: "currency",
@@ -78,8 +82,8 @@ const Account: React.FC = () => {
 	const [customErrorMessage, setCustomErrorMessage] = useState<string>("");
 	const [noErrors, setNoErrors] = useState<boolean>(true);
 
-	const getCustomer = (lastName: string, birthDate: string) => {
-		CustomerService.findByLastNameAndBirthDate(lastName, birthDate).then(
+	const getCustomer = (id: string) => {
+		CustomerService.get(id).then(
 			(response: any) => {
 				setCurrentCustomer(response.data);
 			}
@@ -87,16 +91,16 @@ const Account: React.FC = () => {
 	};
 
 	useEffect(() => {
-		if (id) getAccount(id);
-	}, [id]);
+		if (accountId) getAccount(accountId);
+	}, [accountId]);
 
 	useEffect(() => {
-		if ((currentAccount.lastName, currentAccount.birthDate))
-			getCustomer(currentAccount.lastName, currentAccount.birthDate);
-	}, [currentAccount.birthDate, currentAccount.lastName]);
+		if (id)
+			getCustomer(id);
+	}, [id]);
 
 	const refreshPage = () => {
-		if (id) getAccount(id);
+		if (accountId) getAccount(accountId);
 	};
 
 	const updateIsActive = (status: string) => {
@@ -137,7 +141,8 @@ const Account: React.FC = () => {
 		setOtherAccount(Number.parseInt(value));
 	}
 
-	const saveTransaction = () => {
+	const saveTransaction = (e: { preventDefault: () => void; }) => {
+		e.preventDefault();
 		const params = getRequestParams(otherAccount);
 		let data = {
 			id: transaction.id,
@@ -162,7 +167,7 @@ const Account: React.FC = () => {
 				});
 				setSubmitted(true);
 				setNoErrors(true);
-				refreshPage();
+				navigate("/customers/" + id + "/accounts/" + accountId);
 			}).catch((error) => {
 				setNoErrors(false);
 				if (Array.isArray(error.response.data)) {
@@ -336,79 +341,75 @@ const Account: React.FC = () => {
 							</div>
 							<div className="modal-body">
 								<div className="content columns text-center">
-									{submitted ? (
-										<div>Transaction complete.</div>
-									) : (
-										<div>
-											<Form
-												className="form-horizontal"
-												onSubmit={saveTransaction}>
-												<div className="columns">
-													{renderCustomErrorMessage()}
-													<div className="column col-12 py-2">
-														<div className="form-group" id="type-group">
-															<div className="col-6 col-sm-12">
-																<label className="form-label" htmlFor="type">
-																	Transaction Type:
-																</label>
-															</div>
-															<div className="col-6 col-sm-12">
-																<label className="form-radio">
-																	<input
-																		type="radio"
-																		name="type"
-																		value={"WITHDRAWAL"}
-																		onChange={handleInputChange}
-																	/>
-																	<em className="form-icon"></em> Withdrawal
-																</label>
-																<label className="form-radio">
-																	<input
-																		type="radio"
-																		name="type"
-																		value={"DEPOSIT"}
-																		onChange={handleInputChange}
-																	/>
-																	<em className="form-icon"></em> Deposit
-																</label>
-																{renderTransferOption(currentAccount.product)}
-																{renderErrorMessages("type")}
-															</div>
+									<div>
+										<form
+											className="form-horizontal"
+											onSubmit={saveTransaction}>
+											<div className="columns">
+												{renderCustomErrorMessage()}
+												<div className="column col-12 py-2">
+													<div className="form-group" id="type-group">
+														<div className="col-6 col-sm-12">
+															<label className="form-label" htmlFor="type">
+																Transaction Type:
+															</label>
 														</div>
-													</div>
-													{renderTransferTransaction(transferToOtherAccount)}
-													<div className="column col-12 py-2">
-														<div className="form-group" id="amount-group">
-															<div className="col-6 col-sm-12">
-																<label htmlFor="amount">Amount:</label>
-															</div>
-															<div className="col-6 col-sm-12">
+														<div className="col-6 col-sm-12">
+															<label className="form-radio">
 																<input
-																	className="form-input"
-																	type="text"
-																	id="amount"
-																	name="amount"
-																	value={transaction.amount}
+																	type="radio"
+																	name="type"
+																	value={"WITHDRAWAL"}
 																	onChange={handleInputChange}
 																/>
-																{renderErrorMessages("amount")}
-															</div>
+																<em className="form-icon"></em> Withdrawal
+															</label>
+															<label className="form-radio">
+																<input
+																	type="radio"
+																	name="type"
+																	value={"DEPOSIT"}
+																	onChange={handleInputChange}
+																/>
+																<em className="form-icon"></em> Deposit
+															</label>
+															{renderTransferOption(currentAccount.product)}
+															{renderErrorMessages("type")}
 														</div>
 													</div>
 												</div>
-												<div className="modal-footer">
-													<button className="btn btn-primary" type="submit">
-														Submit
-													</button>
+												{renderTransferTransaction(transferToOtherAccount)}
+												<div className="column col-12 py-2">
+													<div className="form-group" id="amount-group">
+														<div className="col-6 col-sm-12">
+															<label htmlFor="amount">Amount:</label>
+														</div>
+														<div className="col-6 col-sm-12">
+															<input
+																className="form-input"
+																type="text"
+																id="amount"
+																name="amount"
+																value={transaction.amount}
+																onChange={handleInputChange}
+															/>
+															{renderErrorMessages("amount")}
+														</div>
+													</div>
 												</div>
-											</Form>
-										</div>
-									)}
+											</div>
+											<div className="modal-footer">
+												<button className="btn btn-primary" type="submit">
+													Submit
+												</button>
+											</div>
+										</form>
+									</div>
 								</div>
 							</div>
 						</div>
 					</div>
-					<div className="column col-4">
+					<div className="column col-4 col-lg-12">
 						<div className="panel">
 							<div className="panel-header">
 								<div className="panel-title h5 text-primary">
@@ -436,88 +437,29 @@ const Account: React.FC = () => {
 							</div>
 							<div className="divider"></div>
 							<div className="panel-body">
-								<div className="accordion">
-									<input
-										type="radio"
-										id="accordion-1"
-										name="accordion-checkbox"
-										hidden
-										checked
-									/>
-									<label className="accordion-header" htmlFor="accordion-1">
-										<i className="icon icon-arrow-right mr-1"></i>
-										Account Info
-									</label>
-									<div className="accordion-body">
-										<div className="tile tile-centered py-2">
-											<div className="tile-content">
-												<div className="tile-title text-bold">
-													<span className="text-gray">Created at</span>{" "}
-													{currentAccount.branch}
-												</div>
-											</div>
-										</div>
-										<div className="tile tile-centered py-2">
-											<div className="tile-content">
-												<div className="tile-title text-bold">
-													<span className="text-gray">Opened on</span>{" "}
-													{currentAccount.openDate}
-												</div>
-											</div>
-										</div>
-										<div className="tile tile-centered py-2">
-											<div className="tile-content">
-												<div className="tile-title text-bold">
-													<span className="text-gray">Last activity</span>{" "}
-												</div>
-												<div className="tile-title text-bold">
-													{currentAccount.lastActivityDate}
-												</div>
-											</div>
+								<div className="tile tile-centered py-2">
+									<div className="tile-content">
+										<div className="tile-title text-bold">
+											<span className="text-gray">Created at</span>{" "}
+											{currentAccount.branch}
 										</div>
 									</div>
 								</div>
-								<div className="accordion">
-									<input
-										type="radio"
-										id="accordion-2"
-										name="accordion-checkbox"
-										hidden
-									/>
-									<label className="accordion-header" htmlFor="accordion-2">
-										<i className="icon icon-arrow-right mr-1"></i>
-										Customer Info
-									</label>
-									<div className="accordion-body">
-										<div className="tile tile-centered py-2">
-											<div className="tile-content">
-												<div className="tile-title text-bold">
-													{currentCustomer?.lastName},{" "}
-													{currentCustomer?.firstName}
-												</div>
-											</div>
+								<div className="tile tile-centered py-2">
+									<div className="tile-content">
+										<div className="tile-title text-bold">
+											<span className="text-gray">Opened on</span>{" "}
+											{currentAccount.openDate}
 										</div>
-										<div className="tile tile-centered pt-2">
-											<div className="tile-content">
-												<div className="tile-title text-bold">
-													{currentCustomer?.address}
-												</div>
-											</div>
+									</div>
+								</div>
+								<div className="tile tile-centered py-2">
+									<div className="tile-content">
+										<div className="tile-title text-bold">
+											<span className="text-gray">Last activity</span>{" "}
 										</div>
-										<div className="tile tile-centered pb-2">
-											<div className="tile-content">
-												<div className="tile-title text-bold text-gray">
-													{currentCustomer?.city}, {currentCustomer?.state}{" "}
-													{currentCustomer?.zipCode}
-												</div>
-											</div>
-										</div>
-										<div className="tile tile-centered py-2">
-											<div className="tile-content">
-												<div className="tile-title text-bold">
-													{currentCustomer.birthDate}
-												</div>
-											</div>
+										<div className="tile-title text-bold">
+											{currentAccount.lastActivityDate}
 										</div>
 									</div>
 								</div>
@@ -529,7 +471,7 @@ const Account: React.FC = () => {
 							</div>
 						</div>
 					</div>
-					<div className="column col-8">{renderToggleTransactions()}</div>
+					<div className="column col-8 col-lg-12">{renderToggleTransactions()}</div>
 				</div>
 			) : (
 				<div>howdy, how's it going?</div>

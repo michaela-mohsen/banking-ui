@@ -15,11 +15,12 @@ const Profile: React.FC = () => {
         startDate: "",
         department: ""
     }
-    useEffect(() => {
-        if (currentUser.email) getEmployeeByEmail(currentUser.email);
-    }, [currentUser.email]);
+    // useEffect(() => {
+    //     if (currentUser.email) getEmployeeByEmail(currentUser.email);
+    // }, [currentUser.email]);
 
     const [currentEmployee, setCurrentEmployee] = useState<IEmployeeData>(initialEmployeeData);
+    const [employees, setEmployees] = useState<Array<IEmployeeData>>([]);
 
     const getEmployeeByEmail = (email: string) => {
         EmployeeService.findByEmail(email).then((response: any) => {
@@ -27,6 +28,13 @@ const Profile: React.FC = () => {
         })
     }
 
-    return <div>There should be an employee here. Is it {currentEmployee.firstName}?</div>
+    const getAllEmployees = () => {
+        EmployeeService.findAll().then((response: any) => {
+            setEmployees(response.data);
+        })
+    }
+    return <div>There should be an employee here. Is it {currentUser.email}? Click these buttons to test authorization.
+        <button type="button" onClick={() => getEmployeeByEmail(currentUser.email)}>Get Employee</button>
+        <button type="button" onClick={() => getAllEmployees()}>Get All Employees</button></div>
 };
 export default Profile;

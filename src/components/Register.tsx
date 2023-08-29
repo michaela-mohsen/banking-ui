@@ -2,6 +2,7 @@ import { ChangeEvent, useState } from "react";
 import IRegisterData from "../types/Register";
 import ICustomErrorData from "../types/CustomError";
 import AuthService from "../services/AuthService";
+import { Link } from "react-router-dom";
 
 const Register: React.FC = () => {
     const initialRegisterState = {
@@ -51,7 +52,9 @@ const Register: React.FC = () => {
         registerFunction.then((response: any) => {
             setRegister(response.data);
             setNoErrors(true);
+            setSubmitted(true);
         }).catch((error) => {
+            setSubmitted(false);
             if (Array.isArray(error.response.data)) {
                 setNoErrors(false);
                 setErrorMessages(Array.from(error.response.data));
@@ -88,7 +91,7 @@ const Register: React.FC = () => {
             <h3 className="card-title text-center">User Account Registration</h3>
         </div>
         <div className="card-body">
-            <form
+            {submitted ? (<div className="toast toast-primary p-2"><Link to="/login" className="btn btn-link text-light">User registered successfully. Please log in.</Link></div>) : (<form
                 className="form-horizontal px-2 s-rounded" onSubmit={handleRegister}>
                 <div className="columns">
                     {renderCustomErrorMessage()}
@@ -247,7 +250,7 @@ const Register: React.FC = () => {
                 <button type="submit" className="btn btn-success p-centered">
                     Register
                 </button>
-            </form>
+            </form>)}
         </div>
     </div>
 };

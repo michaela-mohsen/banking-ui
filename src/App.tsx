@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from "react";
 import "./App.css";
 import { Link, Route, Routes, useNavigate } from "react-router-dom";
 import AddAccount from "./components/AddAccount";
@@ -11,14 +10,28 @@ import Login from "./components/Login";
 import Profile from "./components/Profile";
 import AuthService from "./services/AuthService";
 import Register from "./components/Register";
+import Customer from "./components/Customer";
+import { useEffect, useState } from "react";
+import CustomerIndex from "./components/CustomerIndex";
 
 function App() {
 	let navigate = useNavigate();
+	const currentUser = AuthService.getCurrentUser();
+
+	const [userIsLoggedIn, setUserIsLoggedIn] = useState<boolean>(false);
 
 	const logOut = () => {
 		AuthService.logout();
+		localStorage.removeItem("user");
 		navigate("/login")
+		window.location.reload();
+		setUserIsLoggedIn(false);
 	};
+
+
+	useEffect(() => {
+		if (currentUser) AuthService.getCurrentUser();
+	}, [currentUser])
 
 	return (
 		<div className="App">
@@ -26,36 +39,9 @@ function App() {
 				<section className="navbar-section">
 					<ul className="nav">
 						<li className="nav-item">
-							<a className="btn btn-link text-primary" href="@{/home}">
-								Home
-							</a>
-						</li>
-					</ul>
-				</section>
-				<section className="navbar-section">
-					<ul className="nav">
-						<li className="nav-item">
-							<Link to={"/accounts"} className="btn btn-link text-primary">
-								Accounts
-							</Link>
-						</li>
-					</ul>
-				</section>
-				<section className="navbar-section">
-					<ul className="nav">
-						<li className="nav-item">
 							<Link to={"/customers"} className="btn btn-link text-primary">
 								Customers
 							</Link>
-						</li>
-					</ul>
-				</section>
-				<section className="navbar-section">
-					<ul className="nav">
-						<li className="nav-item">
-							<a className="btn btn-link text-primary" href="@{/employees}">
-								Employees
-							</a>
 						</li>
 					</ul>
 				</section>
@@ -84,10 +70,13 @@ function App() {
 					<Route path="/profile" element={<Profile />} />
 					<Route path="/accounts" element={<AccountsList />} />
 					<Route path="/customers" element={<CustomersList />} />
-					<Route path="/accounts/add-account" element={<AddAccount />} />
+					<Route path="/customers/:id" element={<Customer />}>
+						<Route index={true} element={<CustomerIndex />} />
+						<Route path="/customers/:id/update" element={<UpdateCustomer />} />
+						<Route path="/customers/:id/add-account" element={<AddAccount />} />
+						<Route path="/customers/:id/accounts/:accountId" element={<Account />} />
+					</Route>
 					<Route path="/customers/add-customer" element={<AddCustomer />} />
-					<Route path="/customers/update-customer/:id" element={<UpdateCustomer />} />
-					<Route path="/accounts/:id" element={<Account />} />
 				</Routes>
 			</div>
 		</div>

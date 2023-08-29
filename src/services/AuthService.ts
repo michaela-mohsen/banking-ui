@@ -16,14 +16,13 @@ const login = (data: ILoginData) => {
 }
 
 const logout = () => {
-    localStorage.removeItem("user");
     return httpCommon.get("/auth/sign-out", { headers: authHeader() });
 }
 
 const getCurrentUser = () => {
     const userString = localStorage.getItem("user");
     if (userString) return JSON.parse(userString);
-    else return "Not sure what this is";
+    else return null;
 }
 
 const AuthService = {
