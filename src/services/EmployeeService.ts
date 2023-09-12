@@ -9,9 +9,14 @@ const findByEmail = (email: string) => {
 const findAll = () => {
     return httpCommon.get<Array<IEmployeeData>>(`/user/employees`, { headers: authHeader() });
 }
+
+const update = (id: string, data: IEmployeeData) => {
+    return httpCommon.put<IEmployeeData>(`/user/employees/update/${id}`, data, { headers: authHeader() });
+}
 const EmployeeService = {
     findByEmail,
-    findAll
+    findAll,
+    update
 };
 
 export default EmployeeService;

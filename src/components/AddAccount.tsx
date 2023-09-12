@@ -54,7 +54,9 @@ const AddAccount: React.FC = () => {
 		branch: "",
 		department: "",
 		startDate: "",
-		title: ""
+		title: "",
+		oldPassword: "",
+		newPassword: ""
 	}
 
 	const [account, setAccount] = useState<IAccountData>(initialAccountState);

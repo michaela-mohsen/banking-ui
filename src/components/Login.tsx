@@ -47,7 +47,7 @@ const Login: React.FC = () => {
             if (response.data) {
                 localStorage.setItem("user", JSON.stringify(response.data));
             }
-            navigate("/profile")
+            navigate("/customers")
         }).catch((error) => {
             if (Array.isArray(error.response.data)) {
                 setNoErrors(false);
@@ -95,7 +95,7 @@ const Login: React.FC = () => {
                             <label className="form-label" htmlFor="username">Username:</label>
                         </div>
                         <div className="col-9 col-sm-12">
-                            <input className="form-input" title="username" name="username" type="text" value={login.username} onChange={handleInputChange} />
+                            <input className="form-input" id="username" name="username" type="text" value={login.username} onChange={handleInputChange} autoComplete="on" />
                             {renderErrorMessages("username")}
                         </div>
 
@@ -107,7 +107,7 @@ const Login: React.FC = () => {
                             <label className="form-label" htmlFor="password">Password:</label>
                         </div>
                         <div className="col-9 col-sm-12">
-                            <input className="form-input" title="password" name="password" type="password" value={login.password} onChange={handleInputChange} />
+                            <input className="form-input" id="password" name="password" type="password" value={login.password} onChange={handleInputChange} autoComplete="on" />
                             {renderErrorMessages("password")}
                         </div>
 

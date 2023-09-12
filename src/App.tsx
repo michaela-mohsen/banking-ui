@@ -1,7 +1,6 @@
 import "./App.css";
-import { Link, Route, Routes, useNavigate } from "react-router-dom";
+import { NavLink, Route, Routes, useNavigate } from "react-router-dom";
 import AddAccount from "./components/AddAccount";
-import AccountsList from "./components/AccountsList";
 import Account from "./components/Account";
 import CustomersList from "./components/CustomersList";
 import AddCustomer from "./components/AddCustomer";
@@ -13,6 +12,8 @@ import Register from "./components/Register";
 import Customer from "./components/Customer";
 import { useEffect, useState } from "react";
 import CustomerIndex from "./components/CustomerIndex";
+import UpdateProfile from "./components/UpdateProfile";
+import ProfileIndex from "./components/ProfileIndex";
 
 function App() {
 	let navigate = useNavigate();
@@ -33,42 +34,35 @@ function App() {
 		if (currentUser) AuthService.getCurrentUser();
 	}, [currentUser])
 
+	const toggleNavbarIfLoggedIn = () => {
+		if (currentUser) {
+			return (<header className="navbar bg-secondary">
+				<section className="navbar-center">
+					<NavLink className={({ isActive }) => isActive ? "btn btn-link active" : "btn btn-link"} to={"/customers"}>Customers</NavLink>
+				</section>
+				<section className="navbar-center">
+					<NavLink className={({ isActive }) => isActive ? "btn btn-link active" : "btn btn-link"} to={"/profile"}>Profile</NavLink>
+				</section>
+				<section className="navbar-center">
+					<button type="button" className="btn btn-link" onClick={logOut}>Log Out</button>
+				</section>
+			</header>);
+		}
+	}
+
 	return (
 		<div className="App">
-			<header className="navbar bg-secondary">
-				<section className="navbar-section">
-					<ul className="nav">
-						<li className="nav-item">
-							<Link to={"/customers"} className="btn btn-link text-primary">
-								Customers
-							</Link>
-						</li>
-					</ul>
-				</section>
-				<section className="navbar-section">
-					<ul className="nav">
-						<li className="nav-item">
-							<Link to={"/profile"} className="btn btn-link text-primary">
-								Profile
-							</Link>
-						</li>
-					</ul>
-				</section>
-				<section className="navbar-section">
-					<ul className="nav">
-						<li className="nav-item">
-							<button type="button" className="btn btn-link" onClick={logOut}>Log Out</button>
-						</li>
-					</ul>
-				</section>
-			</header>
+			{toggleNavbarIfLoggedIn()}
 			<div className="container">
 				<Routes>
 					<Route path="/" element={<Login />} />
 					<Route path="/login" element={<Login />} />
 					<Route path="/register" element={<Register />} />
-					<Route path="/profile" element={<Profile />} />
-					<Route path="/accounts" element={<AccountsList />} />
+					<Route path="/profile" element={<Profile />}>
+						<Route index={true} element={<ProfileIndex />} />
+						<Route path="/profile/home" element={<ProfileIndex />} />
+						<Route path="/profile/update" element={<UpdateProfile />} />
+					</Route>
 					<Route path="/customers" element={<CustomersList />} />
 					<Route path="/customers/:id" element={<Customer />}>
 						<Route index={true} element={<CustomerIndex />} />

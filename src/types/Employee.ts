@@ -6,5 +6,7 @@ export default interface IEmployeeData {
     startDate: string,
     title: string,
     branch: string,
-    department: string
+    department: string,
+    oldPassword: string,
+    newPassword: string
 }

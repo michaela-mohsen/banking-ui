@@ -1,4 +1,5 @@
 import httpCommon from "../http-common";
+import authHeader from "./Auth-Header";
 
 const getLocalRefreshToken = () => {
     const userString = localStorage.getItem("user");
@@ -26,7 +27,7 @@ const updateLocalToken = (token: string) => {
 }
 
 const refreshToken = (refreshToken: string) => {
-    return httpCommon.post("/auth/refresh-token", refreshToken);
+    return httpCommon.post("/auth/refresh-token", refreshToken, { headers: authHeader() });
 }
 
 const TokenService = {
