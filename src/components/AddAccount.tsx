@@ -68,6 +68,8 @@ const AddAccount: React.FC = () => {
 	const [errorMessages, setErrorMessages] = useState<Array<ICustomErrorData>>(
 		[]
 	);
+	const [customErrorMessage, setCustomErrorMessage] = useState<string>("");
+
 	useEffect(() => {
 		findAllBranches();
 	}, [branches]);
@@ -151,7 +153,8 @@ const AddAccount: React.FC = () => {
 		</div>
 	}
 
-	const saveAccount = () => {
+	const saveAccount = (e: { preventDefault: () => void; }) => {
+		e.preventDefault();
 		let data = {
 			availableBalance: account.availableBalance,
 			pendingBalance: account.pendingBalance,
@@ -185,12 +188,16 @@ const AddAccount: React.FC = () => {
 					transactions: response.data.transactions,
 				});
 				setNoErrors(true);
-				navigate("/customers/" + customer.id + "/accounts/" + account.id);
+				navigate("/customers/" + customer.id);
+				window.location.reload();
 			})
 			.catch((error) => {
 				if (Array.isArray(error.response.data)) {
 					setErrorMessages(Array.from(error.response.data));
 					setNoErrors(false);
+				} else {
+					setNoErrors(false);
+					setCustomErrorMessage(error.response.data);
 				}
 			});
 		return createAccountFunction;
@@ -211,13 +218,20 @@ const AddAccount: React.FC = () => {
 		return <div className="form-input-hint">{messages}</div>;
 	}
 
+	const renderCustomErrorMessage = () => {
+		if (!noErrors && customErrorMessage !== "") {
+			return <div className="toast toast-error">{customErrorMessage}</div>
+		}
+	}
+
 	return (
 		<div>
 			<form className="card m-2 form-horizontal" onSubmit={saveAccount}>
 				<div className="card-header">
-					<h2 className="card-title text-center">New Account</h2>
+					<h3 className="card-title text-center">New Account</h3>
 				</div>
 				<div className="card-body columns">
+					{renderCustomErrorMessage()}
 					<div className="column col-12 py-2">
 						<div className="form-group" id="product-group">
 							<div className="col-3 col-sm-12">
@@ -299,6 +313,7 @@ const AddAccount: React.FC = () => {
 									onChange={handleInputChange}
 									disabled
 								/>
+								{renderErrorMessage("lastName")}
 							</div>
 						</div>
 					</div>
@@ -306,7 +321,7 @@ const AddAccount: React.FC = () => {
 						<div className="form-group" id="birthDate-group">
 							<div className="col-3 col-sm-12">
 								<label className="form-label" htmlFor="birthDate">
-									Customer's Date of Birth:
+									Customer's DOB:
 								</label>
 							</div>
 							<div className="col-9 col-sm-12">
@@ -319,6 +334,7 @@ const AddAccount: React.FC = () => {
 									id="birthDate"
 									disabled
 								/>
+								{renderErrorMessage("birthDate")}
 							</div>
 						</div>
 					</div>
@@ -347,6 +363,7 @@ const AddAccount: React.FC = () => {
 									name="employee"
 									disabled
 								/>
+								{renderErrorMessage("employee")}
 							</div>
 						</div>
 					</div>
